@@ -1,0 +1,10 @@
+An Nmap scan identified ports 22, 80, and 3000 as open.
+Port 80 hosted a JavaScript compiler interface that displayed code execution results directly in the browser.
+Enumeration of the application revealed information about the library used by the compiler tool.
+Research identified a known vulnerability affecting this library, allowing sandbox escape and arbitrary code execution on the host system.
+Exploitation of the vulnerability resulted in obtaining a reverse shell on the target machine.
+Privilege escalation opportunities were limited with the compromised user account; however, enumeration showed that the user joshua had an associated Bash shell.
+Further directory enumeration led to the discovery of a database file.
+Using sqlite3, the database tables were inspected.
+A hashed password belonging to joshua was identified. After determining the hash type, the password was successfully cracked using Hashcat.
+Since user switching was restricted from the current shell, the recovered credentials were used to authenticate through the SSH service.
