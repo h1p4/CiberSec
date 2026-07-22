@@ -1,61 +1,38 @@
-#json #command_injection #mysql #
-### Exploitation and Vulnerability Analysis Process
+# 2Million — HackTheBox
 
-1. **Initial Scan with Nmap**
-    
-    - Identified **port 80** as open.
-2. **Web Exploration**
-    
-    - Edited the `/etc/hosts` file to access the web application.
-    - Found a JavaScript file located at `/invite`.
-3. **Analyzing the JavaScript File**
-    
-    - Used a beautifier to format and understand the JavaScript code.
-    - Discovered an encrypted message in the responses.
-4. **Decrypting the Message with CyberChef**
-    
-    - Used **CyberChef** to decrypt the message.
-    - Encountered an HTTP **301 Moved Permanently** status, indicating a wrong path.
-    - Eventually retrieved the invitation code.
-5. **Registration and Authentication Process**
-    
-    - Decoded the invitation code using:
-        `echo "NUU5U1ctNzVCWTktTDhTMUItWklIREo=" | base64 -d`  
-        
-    - Used the code to register and log in.
-6. **Vulnerability Research**
-    
-    - Looked for vulnerabilities on the web application.
-    - Intercepted requests using **Burp Suite**.
-    - Tested shorter paths and found one revealing allowed actions.
-7. **Admin Endpoint Analysis**
-    
-    - Explored admin endpoints and selected the one to update user settings.
-    - Fixed issues with the `Content-Type` by setting it to `application/json`.
-    - Added missing parameters (`{}`).
-    - Successfully escalated privileges to admin.
-8. **Shell Injection via VPN Generation Option**
-    
-    - Discovered a code injection vulnerability in the VPN generation feature.
-    - Gained a shell on the server.
-9. **Information Gathering**
-    
-    - Found a `.env` file containing database credentials.
-    - Accessed the MySQL database using the credentials.
-    - Located a hashed password but couldn’t crack it.
-    - Checked `/etc/passwd` for users and found the `admin` user.
-    - Tried the same password, and it worked.
-    - Retrieved the `user.txt` file.
-10. **Privilege Escalation**
-    
-    - Searched for files owned by the `admin` user:
-        `find / -user admin 2>/dev/null | grep -v '^/sys\|^/proc\|^/run'`
-        
-    - Found an email-related file.
-    - Investigated relevant CVEs.
-    - Found a proof-of-concept on GitHub.
-11. **Exploitation Using the CVE**
-    
-    - Compressed and downloaded the proof-of-concept code from the machine.
-    - Followed the steps and executed the exploit.
-    - Gained root access.
+**Tags:** `#json` `#command-injection` `#mysql`
+
+## Reconnaissance
+- An Nmap scan identified port 80 (HTTP) as open.
+
+## Enumeration
+- Browsed the web application after adding the target's hostname to `/etc/hosts`.
+- Found a JavaScript file served at `/invite`.
+- Beautified the JavaScript to make it readable and discovered an encrypted message embedded in the application's responses.
+- Decrypted the message using CyberChef; an initial attempt returned an HTTP 301 redirect due to an incorrect path, but the correct invitation code was eventually recovered.
+- Decoded the invitation code from Base64:
+  ```bash
+  echo "NUU5U1ctNzVCWTktTDhTMUItWklIREo=" | base64 -d
+  ```
+- Used the decoded code to register an account and log in.
+
+## Foothold
+- Searched the application for further vulnerabilities, intercepting traffic with Burp Suite.
+- Found that shorter, undocumented API paths revealed additional allowed actions.
+- Explored the admin endpoints and located one used to update user settings.
+- Fixed the request by setting the `Content-Type` header to `application/json` and supplying the missing parameters (`{}`), successfully escalating the account to admin privileges.
+- Identified a code injection vulnerability in the VPN generation feature and used it to obtain a reverse shell on the server.
+
+## Privilege Escalation
+- Enumerated the filesystem and found a `.env` file containing database credentials.
+- Used the credentials to access the MySQL database and located a hashed password, which could not be cracked directly.
+- Checked `/etc/passwd`, identified the `admin` user, and reused the same password successfully — retrieving `user.txt`.
+- Searched for files owned by `admin`:
+  ```bash
+  find / -user admin 2>/dev/null | grep -v '^/sys\|^/proc\|^/run'
+  ```
+- Found an email-related file that pointed to a known CVE, for which a public proof-of-concept was available on GitHub.
+- Transferred and executed the PoC on the target, gaining root access.
+
+## Flags
+- `user.txt` and `root.txt` obtained.
