@@ -1,29 +1,23 @@
+# Analytics — HackTheBox (Easy)
 
-#docker 
-1. **Nmap scan:**
-   - Identified open ports: **80** and **22**.
+**Tags:** `#docker` `#metabase` `#kernel-exploit`
 
-2. **Port 80:**
-   - Found a blog site with a **login page** running on **Metabase**.
+## Reconnaissance
+- Nmap scan identified two open ports: 22 (SSH) and 80 (HTTP).
 
-3. **Exploit discovery:**
-   - Found an **unauthenticated Remote Code Execution (RCE)** exploit for Metabase.
-   - Successfully used the exploit to obtain a **reverse shell**.
+## Enumeration
+- Port 80 hosted a blog site with a login page running Metabase.
+- Researched the Metabase version and found a public unauthenticated Remote Code Execution (RCE) exploit.
 
-4. **Reverse shell limitations:**
-   - The shell was **not a fully interactive tty**, making it difficult to work with.
+## Foothold
+- Exploited the Metabase RCE to obtain a reverse shell, though the resulting session was not a fully interactive TTY.
+- The hostname resembled a serial number, suggesting the environment was a Docker container rather than the host itself.
+- Ran `printenv` and found SSH credentials exposed via `.dockerenv`.
+- Used the recovered credentials to log in over SSH.
 
-5. **Docker container suspicion:**
-   - The hostname appeared similar to a **serial number**, suggesting the environment might be a **Docker container**.
+## Privilege Escalation
+- Checked the kernel version with `uname -r` and identified it as vulnerable to a local privilege escalation flaw (CVE-2023-2640).
+- Exploited the kernel vulnerability to obtain a root shell.
 
-6. **Environment inspection:**
-   - Using **printenv**, found **credentials** in **.dockerenv** for **SSH** access.
-
-7. **SSH login:**
-   - Logged in using the credentials found in the Docker environment.
-
-8. **Kernel vulnerability:**
-   - Ran **uname -r** and identified the kernel was vulnerable to a **local privilege escalation** (CVE-2023-2640).
-
-9. **Exploitation:**
-   - Used the vulnerability to **exploit the kernel** and gained **root shell** access.
+## Flags
+- Root access obtained via the kernel exploit.
