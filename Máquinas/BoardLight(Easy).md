@@ -1,23 +1,20 @@
-1. **Nmap scan:**
-   - Found open ports: **22** and **80**.
+# BoardLight — HackTheBox (Easy)
 
-2. **Website vulnerability search:**
-   - No vulnerabilities detected on the main site.
+**Tags:** `#dolibarr` `#config-file-disclosure`
 
-3. **Subdirectory exploration:**
-   - Discovered a **/crm** directory.
+## Reconnaissance
+- Nmap scan found two open ports: 22 (SSH) and 80 (HTTP).
 
-4. **Identified Dolibarr:**
-   - Recognized **Dolibarr CRM** software in the directory.
+## Enumeration
+- No vulnerabilities were identified on the main website.
+- Directory/subdomain enumeration revealed a `/crm` path, identified as a Dolibarr CRM installation.
 
-5. **Exploit search:**
-   - Found and executed a **reverse shell exploit** for Dolibarr.
+## Foothold
+- Located and executed a public reverse shell exploit for Dolibarr, obtaining a shell on the target.
 
-6. **Gained reverse shell:**
-   - Successfully obtained a **reverse shell** on the target machine.
+## Privilege Escalation
+- Searched the filesystem for useful files, focusing on configuration files (`conf.*`).
+- Found root credentials stored in plaintext inside a configuration file, allowing privilege escalation to root.
 
-7. **Internal investigation:**
-   - Searched for useful files, especially focusing on **config files** (conf.*).
-
-8. **Found credentials:**
-   - Discovered **root credentials** inside the configuration files.
+## Flags
+- Root access obtained via the leaked configuration-file credentials.
