@@ -1,40 +1,28 @@
- https://www.youtube.com/watch?v=o6aRIbFuKNA
-1. **Nmap scan:**
-   - Several open ports were discovered.
+# Broker — HackTheBox (Easy)
 
-2. **Port 80:**
-   - Requires authorization.
-   - Used default credentials (admin/admin) and gained access.
-   - Page shows **ActiveMQ** but nothing of interest.
+**Tags:** `#activemq` `#nginx` `#sudo-misconfiguration`
 
-3. **ActiveMQ vulnerability search:**
-   - Found the **ActiveMQ version** from the scan.
-   - The version has a known **CVE for Remote Code Execution (RCE)**.
+## Reconnaissance
+- Nmap scan revealed several open ports, including port 80 (HTTP) and an ActiveMQ management interface.
 
-4. **Exploit the ActiveMQ service:**
-   - Exploited the vulnerability and got a **reverse shell** on the system.
+## Enumeration
+- Port 80 required authentication; default credentials (`admin`/`admin`) granted access, revealing an ActiveMQ instance with no further content of interest.
+- Identified the ActiveMQ version from the scan and researched it, finding a known CVE for Remote Code Execution.
 
-5. **Sudo permissions check:**
-   - Running `sudo -l` revealed **NGINX** can be used with **root permissions**.
+## Foothold
+- Exploited the ActiveMQ RCE vulnerability to obtain a reverse shell on the system.
 
-6. **NGINX configuration:**
-   - `nginx -h` shows a parameter to set a custom **.conf** file.
-   - Created a **.conf** file to enable **DAV service** for file uploads.
-   - Set the **/root** directory as the initial directory.
-   - Assigned a different port (since **port 80** was already in use).
+## Privilege Escalation
+- Ran `sudo -l` and found that NGINX could be executed with root privileges.
+- Used `nginx -h` to identify a flag for specifying a custom configuration file.
+- Crafted a custom `.conf` file enabling the WebDAV module for file uploads, set `/root` as the served directory, and bound it to an alternate port (80 was already in use).
+- Started NGINX with the malicious configuration via `sudo nginx -c <custom.conf>` and confirmed with `ss -tlpn` that the new port (1337) was listening.
+- Generated an SSH key pair locally with `ssh-keygen`.
+- Uploaded the generated public key to `/root/.ssh/authorized_keys` by issuing an HTTP PUT request via `curl`, supplying the key's contents as the request body.
+- Logged in as root using the corresponding private key:
+  ```bash
+  ssh -i root root@localhost
+  ```
 
-7. **Start NGINX with the custom configuration:**
-   - Ran `sudo nginx` with the custom **.conf**.
-   - Checked running services with `ss -tlpn` and confirmed **port 1337** was active.
-
-8. **File upload preparation:**
-   - Since we can upload files to **/root**, we generated **SSH keys** using `ssh-keygen`.
-   - Set the keys to be saved in **/root**.
-
-9. **Upload SSH public key:**
-   - Used `curl PUT` to upload the **public key** to **/root/.ssh/authorized_keys**.
-   - Used `-d $(cat root.pub)` to send the content of the public key.
-
-10. **SSH login as root:**
-    - Successfully logged in using the private key: `ssh -i root root@localhost`.
-    - Gained access to the system as **root**.
+## Flags
+- Root access obtained via the NGINX WebDAV upload and SSH key injection.
